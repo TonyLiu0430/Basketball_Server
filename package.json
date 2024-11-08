@@ -1,6 +1,7 @@
 {
   "private": true,
   "scripts": {
+    "postinstall": "nitro prepare && prisma generate",
     "build": "nitro build",
     "dev": "nitro dev",
     "prepare": "nitro prepare",
