@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
+    "build": "^0.1.4",
+    "nitro": "^0.0.0",
     "prisma": "^5.22.0"
   }
 }
