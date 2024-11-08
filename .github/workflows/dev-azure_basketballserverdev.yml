@@ -2,10 +2,10 @@ name: azure
 on:
   push:
     branches:
-      - main
+      - dev-azure
   pull_request:
     branches:
-      - main
+      - dev-azure
 jobs:
   deploy:
     runs-on: ${{ matrix.os }}
