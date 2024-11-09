@@ -14,10 +14,11 @@ model LoginEmailfrequency {
 }
 
 model LoginToken {
-  id            Int      @id @default(autoincrement())
   email         String
-  token         String
+  token         Int
   time          DateTime
+  @@unique([email, token])
+  @@index([time])
 }
 
 model User {

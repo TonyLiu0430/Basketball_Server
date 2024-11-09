@@ -1,4 +1,6 @@
-export default defineNitroErrorHandler((error, event) => {
+import { H3Error, H3Event } from 'h3';
+
+export default defineNitroErrorHandler((error: H3Error, event : H3Event) => {
     console.error(error.stack)
 
     setResponseStatus(event, error.statusCode || 503)
