@@ -18,6 +18,7 @@ model LoginToken {
   token         Int
   time          DateTime
   @@unique([email, token])
+  @@index([time])
 }
 
 model User {

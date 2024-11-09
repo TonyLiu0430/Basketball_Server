@@ -29,7 +29,11 @@ export default defineEventHandler(async (event) => {
         where: {
             email
         },
-        update: {},
+        update: {
+            times: {
+                increment: 1
+            }
+        },
         create: {
             email,
             requestTime: new Date()
@@ -41,26 +45,15 @@ export default defineEventHandler(async (event) => {
     })
 
     const timeDiff = timeDifference(requestTime);
+    
     if (timeDiff < EXPIREDTIME * 2 && times > 5) {
         throw createError({
             statusCode: 429,
             message: 'Too many requests'
         })
     }
-    if (timeDiff < EXPIREDTIME * 2) {
-        await prisma.loginEmailfrequency.update({
-            where: {
-                email
-            },
-            data: {
-                times: {
-                    increment: 1
-                }
-            },
-            select: null
-        })
-    }
-    else {
+
+    if (timeDiff > EXPIREDTIME * 2) {
         await prisma.loginEmailfrequency.update({
             where: {
                 email
