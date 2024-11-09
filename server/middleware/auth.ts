@@ -1,4 +1,7 @@
 import jwt from 'jsonwebtoken';
+import prisma from '~~/lib/prisma';
+
+
 export default defineEventHandler(async (event) => {
     console.log('123')
     const jwtToken = event.headers.get('authorization');
@@ -6,12 +9,21 @@ export default defineEventHandler(async (event) => {
         return;
     }
     try {
-        const userInfo = jwt.verify(jwtToken, process.env.AUTH_SECRET!) as {
+        const {id, email} = jwt.verify(jwtToken, process.env.AUTH_SECRET!) as {
             id: number,
             email: string
         };
-        event.context.userId = userInfo.id;
-        event.context.email = userInfo.email;
+        
+        await prisma.user.findUniqueOrThrow({
+            where: {
+                id,
+                email
+            },
+            select: null
+        })
+        
+        event.context.userId = id;
+        event.context.email = email;
     }
     catch (error) {
         if (error instanceof jwt.JsonWebTokenError) {
