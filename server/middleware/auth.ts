@@ -3,7 +3,6 @@ import prisma from '~~/lib/prisma';
 
 
 export default defineEventHandler(async (event) => {
-    console.log('123')
     const jwtToken = event.headers.get('authorization');
     if (jwtToken == null || jwtToken == '') {
         return;
@@ -19,7 +18,9 @@ export default defineEventHandler(async (event) => {
                 id,
                 email
             },
-            select: null
+            select: {
+                id: false
+            }
         })
         
         event.context.userId = id;
