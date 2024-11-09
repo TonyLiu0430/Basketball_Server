@@ -102,7 +102,7 @@ export default defineEventHandler(async (event) => {
             html:
                 `<h1>您的登錄驗證碼是</h1><br>
                 <h2>${token}</h2>
-                <p>此驗證碼將在 5 分鐘後失效</p>`
+                <p>此驗證碼將在 ${EXPIREDTIME} 分鐘後失效</p>`
         },
         recipients: {
             to: [{address: email}]
