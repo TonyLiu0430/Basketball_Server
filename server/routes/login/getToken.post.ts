@@ -6,13 +6,16 @@ import { EXPIREDTIME } from '~~/lib/tokenExpireConfig';
 
 export default defineEventHandler(async (event) => {
     //刪除逾期token
-    await prisma.loginToken.deleteMany({
-        where: {
-            time: {
-                lt: new Date(new Date().getTime() - EXPIREDTIME * 3 * 60000)
-            }
-        }
-    })
+    const loginTokenTableSize = await prisma.loginToken.count();
+    if (loginTokenTableSize > 100) {
+        await prisma.loginToken.deleteMany({
+            where: {
+                time: {
+                    lt: new Date(new Date().getTime() - EXPIREDTIME * 3 * 60000)
+                }
+            },
+        })
+    }
 
     const { email } = await readBody(event) as {
         email : string | undefined
@@ -45,7 +48,7 @@ export default defineEventHandler(async (event) => {
     })
 
     const timeDiff = timeDifference(requestTime);
-    
+
     if (timeDiff < EXPIREDTIME * 2 && times > 5) {
         throw createError({
             statusCode: 429,
