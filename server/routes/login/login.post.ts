@@ -1,6 +1,7 @@
 import prisma from '~~/lib/prisma';
 import { isVaildEmail, timeDifference } from '~~/lib/util';
 import jwt from 'jsonwebtoken';
+import { EXPIREDTIME } from '~~/lib/tokenExpireConfig';
 
 export default defineEventHandler(async (event) => {
     const { email, token } = await readBody(event) as {
@@ -45,8 +46,7 @@ export default defineEventHandler(async (event) => {
     
     const timeDiff = timeDifference(tokenTime);
 
-    // 時限 5 分鐘
-    if(timeDiff > 5){
+    if(timeDiff > EXPIREDTIME){
         throw createError({
             statusCode: 400,
             message: 'Token expired'
