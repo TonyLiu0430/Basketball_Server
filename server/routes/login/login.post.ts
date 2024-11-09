@@ -15,7 +15,8 @@ export default defineEventHandler(async (event) => {
         })
     }
 
-    if (token == undefined || isNaN(parseInt(token)) || token.length != 6){
+    // SQL injection prevention
+    if (token == undefined || isNaN(parseInt(token)) || isNaN(Number(token)) || token.length != 6){
         throw createError({
             statusCode: 400,
             message: 'Invalid token'
