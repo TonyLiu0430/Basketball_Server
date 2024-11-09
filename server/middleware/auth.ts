@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 export default defineEventHandler(async (event) => {
     console.log('123')
     const jwtToken = event.headers.get('authorization');
-    if (jwtToken == null) {
+    if (jwtToken == null || jwtToken == '') {
         return;
     }
     try {
