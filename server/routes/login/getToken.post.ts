@@ -1,85 +1,76 @@
 import prisma from '~~/lib/prisma'
-import isVaildEmail from '~~/lib/util';
+import { isVaildEmail, timeDifference} from '~~/lib/util';
 import otpGenerator from 'otp-generator';
-import { EmailClient }  from '@azure/communication-email';
-
-const emailClient = new EmailClient(process.env.COMMUNICATION_SERVICES_CONNECTION_STRING!);
+import { EmailClient } from '@azure/communication-email';
+import { EXPIREDTIME } from '~~/lib/tokenExpireConfig';
 
 export default defineEventHandler(async (event) => {
     //刪除逾期token
     await prisma.loginToken.deleteMany({
         where: {
             time: {
-                lt: new Date(new Date().getTime() - 5 * 60 * 1000)
+                lt: new Date(new Date().getTime() - EXPIREDTIME * 3 * 60000)
             }
         }
     })
 
-
     const { email } = await readBody(event) as {
-        email : string
+        email : string | undefined
     }
     
-    if (isVaildEmail(email) == false) {
+    if (email == undefined || isVaildEmail(email) == false) {
         throw createError({
             statusCode: 400,
             message: 'Invalid email'
         })
     }
-    const loginUser = await prisma.loginEmailfrequency.findUnique({
+
+    const {requestTime, times} = await prisma.loginEmailfrequency.upsert({
         where: {
             email
+        },
+        update: {},
+        create: {
+            email,
+            requestTime: new Date()
+        },
+        select: {
+            requestTime: true,
+            times: true
         }
     })
-    if (loginUser == null) {
-        await prisma.loginEmailfrequency.create({
-            data: {
-                email,
-                requestTime: new Date(),
-            }
-        });
+
+    const timeDiff = timeDifference(requestTime);
+    if (timeDiff < EXPIREDTIME * 2 && times > 5) {
+        throw createError({
+            statusCode: 429,
+            message: 'Too many requests'
+        })
     }
-    else {
-        const { requestTime, times } = await prisma.loginEmailfrequency.findUnique({
+    if (timeDiff < EXPIREDTIME * 2) {
+        await prisma.loginEmailfrequency.update({
             where: {
                 email
             },
-            select: {
-                requestTime: true,
-                times: true
-            }
+            data: {
+                times: {
+                    increment: 1
+                }
+            },
+            select: null
         })
-        const currentTime = new Date();
-        const timeDifference = (currentTime.getTime() - requestTime.getTime()) / 60000;
-        if (timeDifference < 10 && times > 5) {
-            throw createError({
-                statusCode: 429,
-                message: 'Too many requests'
-            })
-        }
-        if (timeDifference < 10) {
-            await prisma.loginEmailfrequency.update({
-                where: {
-                    email
-                },
-                data: {
-                    times: {
-                        increment: 1
-                    }
-                }
-            })
-        }
-        else {
-            await prisma.loginEmailfrequency.update({
-                where: {
-                    email
-                },
-                data: {
-                    requestTime: new Date(),
-                    times: 1
-                }
-            })
-        }
+    }
+    else {
+        await prisma.loginEmailfrequency.update({
+            where: {
+                email
+            },
+            data: {
+                requestTime: new Date(),
+                times: 1
+            },
+            select: null
+        })
     }
 
     const token = otpGenerator.generate(6, {
@@ -89,15 +80,25 @@ export default defineEventHandler(async (event) => {
         specialChars: false
     });
 
-
-    await prisma.loginToken.create({
-        data: {
-            email,
-            token,
+    await prisma.loginToken.upsert({
+        where: {
+            email_token: {
+                email,
+                token: parseInt(token)
+            }
+        },
+        update: {
             time: new Date()
-        }
+        },
+        create: {
+            email,
+            token: parseInt(token),
+            time: new Date()
+        },
+        select: null
     })
 
+    const emailClient = new EmailClient(process.env.COMMUNICATION_SERVICES_CONNECTION_STRING!);
     const poller = await emailClient.beginSend({
         senderAddress: process.env.EMAIL!,
         content: {
@@ -114,10 +115,10 @@ export default defineEventHandler(async (event) => {
 
     const emailResponse = await poller.pollUntilDone();
     
-    if (emailResponse.status === 'Failed') {
+    if (emailResponse.error != undefined) {
         throw createError({
             statusCode: 500,
-            message: 'Failed to send email'
+            message: 'Failed to send email',
         })
     }
     

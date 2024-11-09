@@ -1,48 +1,51 @@
 import prisma from '~~/lib/prisma';
-import isVaildEmail from '~~/lib/util';
+import { isVaildEmail, timeDifference } from '~~/lib/util';
 import jwt from 'jsonwebtoken';
 
 export default defineEventHandler(async (event) => {
     const { email, token } = await readBody(event) as {
-        email: string
-        token: string
+        email: string | undefined,
+        token: string | undefined
     }
-    if (isVaildEmail(email) == false) {
+
+    if (email == undefined || isVaildEmail(email) == false) {
         throw createError({
             statusCode: 400,
             message: 'Invalid email'
         })
     }
-    if(isNaN(Number(token)) || token.length != 6){
+
+    if (token == undefined || isNaN(parseInt(token)) || token.length != 6){
         throw createError({
             statusCode: 400,
             message: 'Invalid token'
         })
     }
 
-    const loinInfo = await prisma.loginToken.findMany({
+
+    const { time: tokenTime } = await prisma.loginToken.findUnique({
         where: {
-            email,
-            token
+            email_token: {
+                email,
+                token: parseInt(token)
+            }
         },
-        orderBy: {
-            time: 'desc'
+        select: {
+            time: true
         }
-    })
-
-    if(loinInfo.length == 0){
+    }) ?? { time: null }
+    
+    if (tokenTime == null) {
         throw createError({
             statusCode: 400,
             message: 'Invalid token'
         })
     }
-
-    const currentTime = new Date();
     
-    const timeDifference = (currentTime.getTime() - loinInfo[0].time.getTime()) / 60000;
+    const timeDiff = timeDifference(tokenTime);
 
     // 時限 5 分鐘
-    if(timeDifference > 5){
+    if(timeDiff > 5){
         throw createError({
             statusCode: 400,
             message: 'Token expired'
@@ -56,6 +59,10 @@ export default defineEventHandler(async (event) => {
         update: {},
         create: {
             email
+        },
+        select: {
+            id: true,
+            email: true
         }
     })
 
