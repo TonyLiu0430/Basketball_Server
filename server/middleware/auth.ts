@@ -13,6 +13,8 @@ export default defineEventHandler(async (event) => {
             email: string
         };
         
+        //just for ensure
+        //remove in production
         await prisma.user.findUniqueOrThrow({
             where: {
                 id,
