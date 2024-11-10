@@ -3,7 +3,7 @@ import prisma from '~~/lib/prisma';
 
 
 export default defineEventHandler(async (event) => {
-    const jwtToken = event.headers.get('authorization');
+    const jwtToken = event.headers.get('jwtAuthorization');
     if (jwtToken == null || jwtToken == '') {
         return;
     }
