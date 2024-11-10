@@ -35,9 +35,9 @@ export default defineEventHandler(async (event) => {
         select: {
             time: true
         }
-    }) ?? { time: null }
+    }) ?? {}
     
-    if (tokenTime == null) {
+    if (tokenTime == undefined) {
         throw createError({
             statusCode: 400,
             message: 'Invalid token'
