@@ -13,6 +13,22 @@ export default defineEventHandler(async (event) => {
 
     const userId = parseInt(userIdStr);
 
+    const user = await prisma.user.findUnique({
+        where: {
+            id: userId
+        },
+        select: {
+            id: true
+        }
+    })
+
+    if (user == null) {
+        throw createError({
+            statusCode: 404,
+            message: `User ${userId} not found`
+        })
+    }
+
     if(event.context.userId != userId){
         throw createError({
             statusCode: 403,
