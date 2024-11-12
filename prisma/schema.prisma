@@ -78,5 +78,4 @@ model Player_to_contest{
   performance   Performance? @relation(fields: [performanceId], references: [id])
   contestId    Int
   contest      Contest      @relation(fields: [contestId], references: [id])
-  name          String   @default("使用者")
 }
