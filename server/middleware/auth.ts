@@ -21,7 +21,7 @@ export default defineEventHandler(async (event) => {
                 email
             },
             select: {
-                id: false
+                id: true
             }
         })
         

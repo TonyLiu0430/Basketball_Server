@@ -3,6 +3,10 @@ export function isVaildEmail(email: string) {
     return emailRegex.test(email)
 }
 
+export function isVaildName(name: string) {
+    return !/[|&;$%@"<>()+,'"]/.test(name);
+}
+
 export function timeDifference(time: Date) {
     return (new Date().getTime() - time.getTime()) / 60000;
 }
