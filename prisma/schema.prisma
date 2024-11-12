@@ -23,7 +23,61 @@ model LoginToken {
 }
 
 model User {
-  id            Int      @id @default(autoincrement())
-  email         String   @unique
+  id    Int    @id @default(autoincrement())
+  email String @unique
+  player Player?
+  name String @default("使用者")
+}
+
+model Player {
+  id    Int    @id @default(autoincrement())
+  name  String
+  number Int //背號
+  player_to_contest Player_to_contest[]
+  teamId Int //外鍵
+  userid Int @unique
+  team Team @relation(fields: [teamId], references: [id])
+  user User @relation(fields: [userid], references: [id])
+}
+
+model Performance{
+  id    Int    @id @default(autoincrement())
+  playerId Int //學號
+  two_point_made Int 
+  two_point_missed Int
+  three_point_made Int
+  three_point_missed Int
+  free_throw_made Int
+  free_throw_missed Int
+  rebound_offensive Int //進攻籃板
+  rebound_defensive Int //防守籃板
+  block Int //阻攻
+  steal Int //抄截
+  assist Int
+  foul Int //犯規
+  mistake Int
+  score Int //總分
+  player_to_contest Player_to_contest?// 一對一的可選關聯
+}
+
+model Team{
+  id    Int    @id @default(autoincrement())
+  name String
+  player Player[]
+}
+
+model Contest{
+  id    Int    @id @default(autoincrement())
+  player_to_contest Player_to_contest[]
+}
+
+model Player_to_contest{
+  id    Int    @id @default(autoincrement())
+  playerId     Int
+  player       Player      @relation(fields: [playerId], references: [id])
+  performanceId Int? @unique
+  performance   Performance? @relation(fields: [performanceId], references: [id])
+  contestId    Int
+  contest      Contest      @relation(fields: [contestId], references: [id])
   name          String   @default("使用者")
 }
