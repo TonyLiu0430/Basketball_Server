@@ -1,5 +1,5 @@
 import prisma from '~~/lib/prisma';
-import { isVaildEmail } from '~~/lib/util';
+import { isVaildEmail, isVaildName } from '~~/lib/util';
 
 export default defineEventHandler(async (event) => {
     const userIdStr = getRouterParam(event, 'userId');
@@ -49,7 +49,7 @@ export default defineEventHandler(async (event) => {
     }
 
     //test name 特殊字元
-    if (/[|&;$%@"<>()+,'"]/.test(name)) {
+    if (isVaildName(name) == false) {
         throw createError({
             statusCode: 400,
             message: 'Invalid name'
