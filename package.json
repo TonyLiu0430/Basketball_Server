@@ -8,6 +8,7 @@
     "preview": "node .output/server/index.mjs"
   },
   "devDependencies": {
+    "@azure/static-web-apps-cli": "^2.0.1",
     "nitropack": "latest"
   },
   "dependencies": {
