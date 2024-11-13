@@ -30,7 +30,7 @@ bun run build
 
 ## 部屬
 
-部屬於 [vercel](https://vercel.com/)
+部屬於 [Azure Static Web Apps](https://azure.microsoft.com/zh-tw/products/app-service/static)
 
 資料庫部署於 [Azure SQL Database](https://azure.microsoft.com/zh-tw/products/azure-sql/database)
 
