@@ -43,7 +43,7 @@ export default defineEventHandler(async (event) => {
         }
         else if (error instanceof jwt.NotBeforeError) {
             throw createError({
-                statusCode: 503,
+                statusCode: 500,
                 message: error.message
             });
         }
