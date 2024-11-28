@@ -24,14 +24,13 @@ export default defineEventHandler(async (event) => {
             playerId: true
         }
     });
-
-    if (!topPlayer || !topPlayer.playerId) {
+    
+    if (!topPlayer) {
         throw createError({
             statusCode: 404,
             message: 'No player found'
         });
     }
-    return {
-        id: topPlayer.playerId
-    }
+    
+    return topPlayer.playerId
 });
