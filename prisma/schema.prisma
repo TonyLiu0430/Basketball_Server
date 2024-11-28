@@ -1,6 +1,7 @@
 generator client {
   provider = "prisma-client-js"
   binaryTargets = ["native", "windows"]
+  previewFeatures = ["omitApi"]
 }
 
 datasource db {
@@ -57,7 +58,7 @@ model Performance{
   foul Int //犯規
   mistake Int
   score Int //總分
-  player_to_contest Player_to_contest?// 一對一的可選關聯
+  player_to_contest Player_to_contest? // 一對一的關聯
 }
 
 model Team{
@@ -79,4 +80,5 @@ model Player_to_contest{
   performance   Performance? @relation(fields: [performanceId], references: [id])
   contestId    Int
   contest      Contest      @relation(fields: [contestId], references: [id])
+  @@unique([playerId, contestId])
 }

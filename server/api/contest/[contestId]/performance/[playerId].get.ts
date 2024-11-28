@@ -21,53 +21,30 @@ export default defineEventHandler(async (event) => {
     const playerId = parseInt(playerIdStr);
     const contestId = parseInt(contestIdStr);
 
-    const player = await prisma.player.findUniqueOrThrow({
+    const { performance } = await prisma.player_to_contest.findUnique({
         where: {
-            id: playerId,
+            playerId_contestId: {
+                playerId: playerId,
+                contestId: contestId,
+            },
         },
         select: {
-            id: true,
-            name: true,
-            number: true,
-            team: {
-                select: {
-                    name: true,
-                },
-            },
-            player_to_contest: { 
-                where: {
-                    id: contestId, 
-                },
-                include: {
-                    performance: {
-                        select: {
-                            two_point_made: true,
-                            two_point_missed: true,
-                            three_point_made: true,
-                            three_point_missed: true,
-                            free_throw_made: true,
-                            free_throw_missed: true,
-                            rebound_offensive: true,
-                            rebound_defensive: true,
-                            block: true,
-                            steal: true,
-                            assist: true,
-                            foul: true,
-                            mistake: true,
-                            score: true,
-                        },
-                    },
-                },
-            },
-        },
-    });
+            performance: {
+                omit: {
+                    id: true,
+                    playerId: true
+                }
+            }
+        }
+    }) ?? {};
 
-    if (!player.player_to_contest || player.player_to_contest.length === 0) {
+    if (!performance) {
         throw createError({
             statusCode: 404,
-            message: 'No matching contest found for the player'
+            message: 'Performance not found'
         });
     }
 
-    return player;
+    
+    return performance
 })
