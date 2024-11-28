@@ -31,14 +31,13 @@ model User {
 }
 
 model Player {
-  id    Int    @id @default(autoincrement())
+  id    Int    @id // 與userId相同
   name  String
   number Int //背號
   player_to_contest Player_to_contest[]
   teamId Int //外鍵
-  userid Int @unique
   team Team @relation(fields: [teamId], references: [id])
-  user User @relation(fields: [userid], references: [id])
+  user User @relation(fields: [id], references: [id]) // id 同時作為userId與playerId
 }
 
 model Performance{
