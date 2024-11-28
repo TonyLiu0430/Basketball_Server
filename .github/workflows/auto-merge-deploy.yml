@@ -1,0 +1,41 @@
+name: auto-merge-to-deploy
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    branches:
+      - main
+
+jobs:
+  auto-merge-to-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Check if branch exists
+        id: branch_check
+        run: |
+          TARGET_BRANCH="deploy-azure_static_web_apps"
+          if git ls-remote --exit-code origin refs/heads/$TARGET_BRANCH; then
+            echo "branch_exists=true" >> $GITHUB_ENV
+          else
+            echo "branch_exists=false" >> $GITHUB_ENV
+          fi
+
+      - name: Skip if branch does not exist
+        if: env.branch_exists == 'false'
+        run: echo "Target branch does not exist. Skipping workflow."
+
+      - name: Merge main to deploy-azure_static_web_apps
+        if: env.branch_exists == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout deploy-azure_static_web_apps
+          git merge origin/main --no-edit
+          git push origin deploy-azure_static_web_apps
