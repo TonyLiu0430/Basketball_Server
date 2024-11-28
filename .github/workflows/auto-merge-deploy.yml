@@ -36,6 +36,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin deploy-azure_static_web_apps
           git checkout deploy-azure_static_web_apps
           git merge origin/main --no-edit
           git push origin deploy-azure_static_web_apps
