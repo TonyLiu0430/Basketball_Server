@@ -39,4 +39,4 @@ jobs:
           git fetch origin deploy-azure_static_web_apps
           git checkout deploy-azure_static_web_apps
           git reset --hard origin/main
-          git push origin deploy-azure_static_web_apps
+          git push -f origin deploy-azure_static_web_apps
